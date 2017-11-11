@@ -18,7 +18,7 @@
     "oni"
   ],
   "files": [
-      "dist"
+    "dist"
   ],
   "author": "Bryan Phelps",
   "license": "MIT",
@@ -28,7 +28,8 @@
   "homepage": "https://github.com/onivim/markdown-language-server#readme",
   "dependencies": {
     "vscode-languageserver": "^3.5.0",
-    "vscode-languageserver-types": "^3.5.0"
+    "vscode-languageserver-types": "^3.5.0",
+    "write-good": "^0.11.3"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.44",
