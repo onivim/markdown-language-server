@@ -1,0 +1,39 @@
+{
+  "name": "markdown-language-server",
+  "version": "0.0.1",
+  "description": "Language server implementation for markdown files",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha --recursive dist/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onivim/markdown-language-server.git"
+  },
+  "keywords": [
+    "markdown",
+    "lsp",
+    "language-server",
+    "oni"
+  ],
+  "files": [
+      "dist"
+  ],
+  "author": "Bryan Phelps",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/onivim/markdown-language-server/issues"
+  },
+  "homepage": "https://github.com/onivim/markdown-language-server#readme",
+  "dependencies": {
+    "vscode-languageserver": "^3.5.0",
+    "vscode-languageserver-types": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.44",
+    "@types/node": "^8.0.51",
+    "mocha": "^4.0.1",
+    "typescript": "^2.6.1"
+  }
+}
