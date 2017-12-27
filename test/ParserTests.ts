@@ -38,7 +38,7 @@ describe("Parser", () => {
                 name: "testImage",
                 url: "http://onivim.io/hero.png",
                 start: 0,
-                end: 29,
+                end: 38,
             }])
         })
     })
