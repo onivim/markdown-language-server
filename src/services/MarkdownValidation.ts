@@ -1,31 +1,41 @@
 import { TextDocument, Diagnostic, DiagnosticSeverity, Range, Position } from "vscode-languageserver-types";
-import { MarkdownSettings } from "../main"
-import { Rules, Rule, Level, RuleSettings } from './lintRules'
-import { start } from "repl";
-const remark = require('remark');
+import { Rules, Rule, Level, RuleSettings, LintsSettings } from './lintRules'
+import { MarkdownDocument } from "../MarkdownDocument";
+import unified from "unified";
+import { VFile, VPoint } from "vfile";
 
 export class MarkdownValidation {
-  public doValidation(textDocument: TextDocument, settings: MarkdownSettings): Promise<Diagnostic[]> {
-    const validator = remark()
+  private validate: (node: any) => Promise<VFile>
+  private rulesSettings: Map<string, RuleSettings>;
 
+  constructor(settings: LintsSettings = {}) {
+    this.configure(settings);
+  }
+
+  public configure(settings: LintsSettings = {}) {
     const rulesSettings = new Map()
-
+    const validator = unified()
     for (const ruleName in Rules) {
       const rule: Rule = (Rules as any)[ruleName]
-      const ruleSettings : RuleSettings = Object.assign(((settings.lints || {}) as any)[ruleName] || {}, rule.defaultSettings)
+      const ruleSettings : RuleSettings = Object.assign((settings as any)[ruleName] || {}, rule.defaultSettings)
       rulesSettings.set(rule.remarkLint, ruleSettings)
 
       if (ruleSettings.level != Level.Ignore)
         validator.use(require(rule.remarkLint), ruleSettings.options)
     }
-    const result: Promise<VFile> = validator.process(textDocument.getText())
+    this.validate = (node) => validator.run(node)
+    this.rulesSettings = rulesSettings;
+  }
 
-    return result.then((file) => file.messages.map(message => {
+  public doValidation(document: MarkdownDocument): Promise<Diagnostic[]> {
+    return this.validate(document.root).then((file) => (file.messages || []).map(message => {
       let range;
-      if(message.location && validatePoint(message.location.start)) {
+      if(message.location && MarkdownValidation.validatePoint(message.location.start)) {
         let end = message.location.end;
-        if (!validatePoint(end))
+
+        if (!MarkdownValidation.validatePoint(end))
           end = message.location.start;
+
         range = Range.create(
           message.location.start.line as number - 1, message.location.start.column as number - 1, 
           end.line as number - 1, end.column as number - 1
@@ -33,7 +43,7 @@ export class MarkdownValidation {
       }
       else
         range = Range.create(0,0,0,0)
-      const ruleSettings = rulesSettings.get(`${message.source}-${message.ruleId}`)
+      const ruleSettings = this.rulesSettings.get(`${message.source}-${message.ruleId}`) || { level: Level.Ignore }
       return <Diagnostic>{
         range,
         severity: ruleSettings.level == Level.Warning ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error,
@@ -43,42 +53,8 @@ export class MarkdownValidation {
       } 
     }))
   }
-}
 
-function validatePoint(point: VPoint) {
-  return point.line && point.offset
-}
-
-type VMessage = {
-  reason: string,
-  fatal: boolean
-  line?: number,
-  column?: number,
-  location?: VPosition,
-  source?: string
-  ruleId?: string
-  stack?: string
-}
-
-type VFile = {
-  contents?: Buffer | string,
-  cwd: string,
-  path?: string,
-  stem?: string,
-  extname?: string,
-  dirname?: string,
-  history: Array<string>,
-  messages: Array<VMessage>
-}
-
-type VPosition = {
-  start: VPoint,
-  end: VPoint,
-  indent?: number
-}
-
-type VPoint = {
-  line?: number,
-  column?: number,
-  offset?: number
+  static validatePoint({ line, offset }: VPoint) {
+    return line && offset
+  }
 }
