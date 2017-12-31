@@ -10,7 +10,7 @@ const connection =
     ? createConnection(process.stdin, process.stdout) // no arg specified
     : createConnection();
 
-console.log = connection.console.log.bind(connection.console)
+//console.log = connection.console.log.bind(connection.console)
 //console.error = connection.console.error.bind(connection.console)
 
 const documents = new TextDocuments()
@@ -36,6 +36,9 @@ documents.onDidChangeContent(change => {
     triggerValidation(change.document)
 })
 
+documents.onDidClose(closed => {
+    server.closeDocument(closed.document)
+})
 
 function cleanPendingValidation(textDocument: TextDocument): void {
     const request = pendingValidationRequests[textDocument.uri];
@@ -69,6 +72,10 @@ connection.onDocumentRangeFormatting(formatting => {
 
 connection.onHover(hover => {
     return server.hover(documents.get(hover.textDocument.uri), hover.position)
+})
+
+connection.onShutdown(() => {
+    server.shutdown()
 })
 
 connection.listen()

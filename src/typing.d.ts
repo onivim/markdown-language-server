@@ -1,17 +1,4 @@
-declare module 'remark-parse' {
-  import { Plugin, Node } from "unified";
-
-  const parse: Plugin
-
-  export default parse;
-}
-
 declare module 'remark-stringify' {
-  import { Plugin } from "unified";
-  
-  const stringify: Plugin
-
-  export default stringify;
 
   // See https://github.com/remarkjs/remark/tree/master/packages/remark-stringify#options
   export type FormatSettings = {
@@ -147,8 +134,8 @@ declare module 'unified' {
     use(plugin: Plugin ,options?: any): this
     parse(value: ToVFile): Node,
     stringify(node: Node, file?: ToVFile): string,
-    run(node: Node, file?: ToVFile): Promise<VFile>,
-    runSync(node: Node, file?: ToVFile): VFile,
+    run(node: Node, file?: ToVFile): Promise<Node>,
+    runSync(node: Node, file?: ToVFile): Node,
     process(file: ToVFile): Promise<VFile>,
     processSync(file: ToVFile): VFile,
     data(key: string): any,
@@ -173,7 +160,7 @@ declare module 'vfile' {
     extname?: string,
     dirname?: string,
     history: Array<string>,
-    messages?: Array<VMessage>
+    messages: Array<VMessage>
   }
 
   export interface VMessage {

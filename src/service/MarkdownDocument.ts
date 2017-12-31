@@ -1,9 +1,11 @@
 import { Range } from "vscode-languageserver";
 
-import unified, { Node } from "unified";
+import { Processor, Node, Plugin } from "unified";
+const unified: Processor = require("unified");
 import { ToVFile } from "vfile";
-import parse from "remark-parse";
-import stringify, { FormatSettings } from "remark-stringify";
+const parse: Plugin = require("remark-parse");
+import { FormatSettings } from "remark-stringify";
+const stringify: Plugin = require("remark-stringify");
 
 
 export class MarkdownDocument {

@@ -9,7 +9,7 @@ export type RuleSettings = {
     options?: any
 }
 export class Rule {
-    public constructor(public remarkLint: string, public defaultSettings: RuleSettings = { level: Level.Ignore }) {}
+    public constructor(public remarkLint: string, public defaultSettings: RuleSettings = { level: Level.Warning }) {}
 }
 
 // Default settings from https://github.com/remarkjs/remark-lint/tree/master/packages/remark-preset-lint-recommended
@@ -33,7 +33,8 @@ export const Rules = {
     linebreakStyle: new Rule('remark-lint-linebreak-style'),
     linkTitleStyle: new Rule('remark-lint-link-title-style'),
     listItemBulletIndent: new Rule('remark-lint-list-item-bullet-indent', { level: Level.Warning }),
-    listItemContentIndent: new Rule('remark-lint-list-item-content-indent'),
+    // TODO: This rule don't finish
+    //listItemContentIndent: new Rule('remark-lint-list-item-content-indent'),
     listItemIndent: new Rule('remark-lint-list-item-indent', { level: Level.Warning, options: 'tab-size' }),
     listItemSpacing: new Rule('remark-lint-list-item-spacing'),
     maximumHeadingLength: new Rule('remark-lint-maximum-heading-length'),
