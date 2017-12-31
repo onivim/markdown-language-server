@@ -1,13 +1,14 @@
 import { TextDocument, Diagnostic, DiagnosticSeverity, Range, Position } from "vscode-languageserver-types";
-import { Rules, Rule, Level, RuleSettings, LintsSettings } from './lintRules'
+import { Rules, Rule, Level, RuleSettings, LintsSettings } from "./lintRules"
 import { MarkdownDocument } from "./MarkdownDocument";
-import { VFile, VPoint } from "vfile";
+import { VFile } from "vfile";
+import { Point as UPoint, Node } from "unist";
 import { Processor } from "unified";
 const unified: Processor = require("unified");
 const vfile = require("vfile");
 
 export class MarkdownValidation {
-  private validate: (node: any) => Promise<VFile>
+  private validate: (node: Node) => Promise<VFile<{}>>
   private rulesSettings: Map<string, RuleSettings>;
 
   constructor(settings: LintsSettings = {}) {
@@ -28,7 +29,7 @@ export class MarkdownValidation {
     validator.freeze()
 
     this.validate = (node) => {
-      const file: VFile = vfile()
+      const file: VFile<{}> = vfile()
       return validator.run(node, file).then(() => file)
     }
     this.rulesSettings = rulesSettings;
@@ -61,7 +62,7 @@ export class MarkdownValidation {
     }))
   }
 
-  static validatePoint({ line, offset }: VPoint) {
+  static validatePoint({ line, offset }: UPoint) {
     return line && offset
   }
 }

@@ -125,10 +125,12 @@ declare module 'remark-stringify' {
 }
 
 declare module 'unified' {
-  import { ToVFile, VFile } from "vfile";
+  import { Contents, VFile } from "vfile";
+  import { Node } from "unist";
 
   export type Plugin = Function | Array<[Function, any]>
-  export type Node = any
+
+  type ToVFile = Contents | VFile<any>
 
   export interface Processor extends ProcessorFunc{
     use(plugin: Plugin ,options?: any): this
@@ -136,8 +138,8 @@ declare module 'unified' {
     stringify(node: Node, file?: ToVFile): string,
     run(node: Node, file?: ToVFile): Promise<Node>,
     runSync(node: Node, file?: ToVFile): Node,
-    process(file: ToVFile): Promise<VFile>,
-    processSync(file: ToVFile): VFile,
+    process(file: ToVFile): Promise<VFile<any>>,
+    processSync(file: ToVFile): VFile<any>,
     data(key: string): any,
     data(key: string, value: any): this,
     freeze(): Processor
@@ -149,46 +151,8 @@ declare module 'unified' {
   export default unified
 }
 
-declare module 'vfile' {
-  export type ToVFile = VFile | string
-
-  export interface VFile {
-    contents?: Buffer | string,
-    cwd: string,
-    path?: string,
-    stem?: string,
-    extname?: string,
-    dirname?: string,
-    history: Array<string>,
-    messages: Array<VMessage>
-  }
-
-  export interface VMessage {
-    reason: string,
-    fatal: boolean
-    line?: number,
-    column?: number,
-    location?: VPosition,
-    source?: string
-    ruleId?: string
-    stack?: string
-  }
-  
-  export interface VPosition {
-    start: VPoint,
-    end: VPoint,
-    indent?: number
-  }
-  
-  export interface VPoint {
-    line?: number,
-    column?: number,
-    offset?: number
-  }
-}
-
 declare module 'unist-util-visit' {
-  import { Node } from "unified";
+  import { Node } from "unist";
 
   type Test = (node: Node) => boolean | string | Object
   function visit(tree: Node, test: Test | Array<Test> | undefined, visitor: (node: Node) => void, reverse?: boolean): void

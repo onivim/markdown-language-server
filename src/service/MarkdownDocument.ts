@@ -1,16 +1,17 @@
 import { Range } from "vscode-languageserver";
 
-import { Processor, Node, Plugin } from "unified";
+import { Processor, Plugin } from "unified";
 const unified: Processor = require("unified");
-import { ToVFile } from "vfile";
+import { Contents } from "vfile";
 const parse: Plugin = require("remark-parse");
 import { FormatSettings } from "remark-stringify";
+import { Parent } from "unist";
 const stringify: Plugin = require("remark-stringify");
 
 
 export class MarkdownDocument {
-  private _root?: Node;
-  constructor(public readonly text: ToVFile) {}
+  private _root?: Parent;
+  constructor(public readonly text: Contents) {}
 
   stringify(settings?: FormatSettings, range?: Range): string {
     let root = this.root
@@ -27,9 +28,9 @@ export class MarkdownDocument {
     return unified().use(stringify, settings).stringify(root)
   }
 
-  get root(): Node {
+  get root(): Parent {
     if (!this._root)
-      this._root = unified().use(parse).parse(this.text)
+      this._root = unified().use(parse).parse(this.text) as Parent
     return this._root;
   }
 }
