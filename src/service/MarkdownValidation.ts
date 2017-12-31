@@ -1,6 +1,6 @@
 import { TextDocument, Diagnostic, DiagnosticSeverity, Range, Position } from "vscode-languageserver-types";
 import { Rules, Rule, Level, RuleSettings, LintsSettings } from './lintRules'
-import { MarkdownDocument } from "../MarkdownDocument";
+import { MarkdownDocument } from "./MarkdownDocument";
 import unified from "unified";
 import { VFile, VPoint } from "vfile";
 

@@ -2,7 +2,7 @@ import { LintsSettings } from "./lintRules";
 import { FormatSettings } from "remark-stringify";
 import { TextDocument, Diagnostic, Range, TextEdit, Position, Hover, MarkedString } from "vscode-languageserver";
 import { MarkdownValidation } from "./MarkdownValidation";
-import { MarkdownDocument } from "../MarkdownDocument";
+import { MarkdownDocument } from "./MarkdownDocument";
 
 export type MarkdownSettings = {
   validate?: boolean,

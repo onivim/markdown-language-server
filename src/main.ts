@@ -1,15 +1,9 @@
 #!/usr/bin/env node
 
-import { createConnection, IConnection, TextDocuments, InitializeParams, InitializeResult, ServerCapabilities } from "vscode-languageserver"
+import { createConnection, TextDocuments, ServerCapabilities } from "vscode-languageserver"
 
 import { TextDocument, Range } from "vscode-languageserver-types"
-
-import * as types from "vscode-languageserver-types"
-import { LintsSettings } from "./services/lintRules"
-import { MarkdownValidation } from "./services/MarkdownValidation";
-import { MarkdownDocument } from "./MarkdownDocument";
-import { FormatSettings } from "remark-stringify";
-import { MarkdownSettings, MarkdownServer } from "./services/MarkdownServer";
+import { MarkdownSettings, MarkdownServer } from "./service/MarkdownServer";
 
 const connection =
   process.argv.length <= 2
@@ -24,7 +18,7 @@ const server = new MarkdownServer({})
 
 documents.listen(connection)
 
-connection.onInitialize((params: InitializeParams): InitializeResult => {
+connection.onInitialize(params => {
     const capabilities: ServerCapabilities = {
         textDocumentSync: documents.syncKind,
         hoverProvider: true,
@@ -32,7 +26,7 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
         documentFormattingProvider: true
     }
 
-    return {capabilities}
+    return { capabilities }
 })
 
 const pendingValidationRequests: { [uri: string]: NodeJS.Timer } = {};
