@@ -2,7 +2,7 @@ import { TextDocument } from "vscode-languageserver/lib/main";
 import { MarkdownDocument } from "./MarkdownDocument";
 import { clearInterval } from "timers";
 
-export class MarkdownDocumentCache {
+export default class MarkdownDocumentCache {
   private markdownDocuments: Map<string, { version: number, languageId: string, time: number, document: MarkdownDocument }>
   private interval?: NodeJS.Timer;
 
@@ -12,9 +12,9 @@ export class MarkdownDocumentCache {
       const time = Date.now() - cleanupInterval * 1000
 
       for (const [uri, info] of this.markdownDocuments.entries())
-        if (info.time < time)
+        if (info.time <= time)
           this.markdownDocuments.delete(uri);
-    }, cleanupInterval)
+    }, cleanupInterval * 1000)
   }
 
   get(document: TextDocument): MarkdownDocument {
@@ -34,7 +34,7 @@ export class MarkdownDocumentCache {
       document: mDoc
     })
 
-    if (this.markdownDocuments.size === this.maxEntries) {
+    if (this.markdownDocuments.size > this.maxEntries) {
       // Remove oldest
       let oldestTime = Infinity
       let oldest
@@ -44,8 +44,7 @@ export class MarkdownDocumentCache {
           oldestTime = info.time
         }
       }
-      if (oldest)
-        this.markdownDocuments.delete(oldest)
+      this.markdownDocuments.delete(oldest as any)
     }
 
     return mDoc
@@ -56,8 +55,10 @@ export class MarkdownDocumentCache {
   }
 
   dispose() {
-    if (this.interval)
+    if (this.interval) {
       clearInterval(this.interval)
+      this.interval = undefined;
+    }
     this.markdownDocuments.clear()
   }
 }
