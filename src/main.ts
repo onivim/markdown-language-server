@@ -23,7 +23,8 @@ connection.onInitialize(params => {
         textDocumentSync: documents.syncKind,
         hoverProvider: true,
         definitionProvider: true,
-        documentFormattingProvider: true
+        documentFormattingProvider: true,
+        // documentRangeFormattingProvider: true TODO: Not Yet Usable see TODO in Markdown Document
     }
 
     return { capabilities }

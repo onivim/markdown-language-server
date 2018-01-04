@@ -31,10 +31,11 @@ export class MarkdownServer {
   format(document: TextDocument, range?: Range): TextEdit[] {
     const mDocument = this.markdownDocuments.get(document)
     const newText = mDocument.stringify(this.settings.format, range)
-    if (!range)
-      range = Range.create(Position.create(0, 0), document.positionAt(document.getText().length));
+    let editRange = range;
+    if (!editRange)
+      editRange = Range.create(Position.create(0, 0), document.positionAt(document.getText().length));
 
-    return [TextEdit.replace(range, mDocument.stringify())]
+    return [TextEdit.replace(editRange, mDocument.stringify(this.settings.format, range))]
   }
   hover(document: TextDocument, position: Position): Hover {
     throw "Not implemented"

@@ -37,7 +37,6 @@ export class MarkdownValidation {
 
   public doValidation(document: MarkdownDocument): Promise<Diagnostic[]> {
     return this.validate(document.root, document.text).then((file) => file.messages.map(message => {
-      console.error(message)
       let range;
       if(message.location && MarkdownValidation.validatePoint(message.location.start)) {
         let end = message.location.end;
