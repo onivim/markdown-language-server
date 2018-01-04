@@ -9,7 +9,7 @@ export type RuleSettings = {
     options?: any
 }
 export class Rule {
-    public constructor(public remarkLint: string, public defaultSettings: RuleSettings = { level: Level.Warning }) {}
+    public constructor(public remarkLint: string, public defaultSettings: RuleSettings = { level: Level.Ignore }) {}
 }
 
 // Default settings from https://github.com/remarkjs/remark-lint/tree/master/packages/remark-preset-lint-recommended
