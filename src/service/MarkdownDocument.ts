@@ -42,16 +42,15 @@ export class MarkdownDocument {
   }
 
   private static findNode(node: Parent , start: Point, end: Point): Node {
-    if (node.children) {
-      for (const child of node.children) {
-        if (child.position &&
-            MarkdownDocument.compare(child.position.start, start) && 
-            MarkdownDocument.compare(end, child.position.end)
-          ) {
+    for (const child of node.children) {
+      if (child.position &&
+          MarkdownDocument.compare(child.position.start, start) && 
+          MarkdownDocument.compare(end, child.position.end)
+        ) {
+        if ("children" in child)
           return MarkdownDocument.findNode(child as Parent, start, end);
-        }
       }
-    }    
+    }
     return node;
   }
 
