@@ -1,14 +1,14 @@
 import { TextDocument, Diagnostic, DiagnosticSeverity, Range, Position } from "vscode-languageserver-types";
 import { Rules, Rule, Level, RuleSettings, LintsSettings } from "./lintRules"
 import { MarkdownDocument } from "./MarkdownDocument";
-import { VFile } from "vfile";
+import { VFile, Contents } from "vfile";
 import { Point as UPoint, Node } from "unist";
 import { Processor } from "unified";
 const unified: Processor = require("unified");
 const vfile = require("vfile");
 
 export class MarkdownValidation {
-  private validate: (node: Node) => Promise<VFile<{}>>
+  private validate: (node: Node, source: Contents) => Promise<VFile<{}>>
   private rulesSettings: Map<string, RuleSettings>;
 
   constructor(settings: LintsSettings = {}) {
@@ -28,15 +28,16 @@ export class MarkdownValidation {
     }
     validator.freeze()
 
-    this.validate = (node) => {
-      const file: VFile<{}> = vfile()
+    this.validate = (node, source) => {
+      const file: VFile<{}> = vfile(source)
       return validator.run(node, file).then(() => file)
     }
     this.rulesSettings = rulesSettings;
   }
 
   public doValidation(document: MarkdownDocument): Promise<Diagnostic[]> {
-    return this.validate(document.root).then((file) => file.messages.map(message => {
+    return this.validate(document.root, document.text).then((file) => file.messages.map(message => {
+      console.error(message)
       let range;
       if(message.location && MarkdownValidation.validatePoint(message.location.start)) {
         let end = message.location.end;
