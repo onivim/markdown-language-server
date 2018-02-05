@@ -67,9 +67,9 @@ connection.onDocumentFormatting(formatting => {
     return server.format(documents.get(formatting.textDocument.uri))
 })
 
-connection.onDocumentRangeFormatting(formatting => {
+/*connection.onDocumentRangeFormatting(formatting => {
     return server.format(documents.get(formatting.textDocument.uri), formatting.range)
-})
+})*/
 
 connection.onHover(hover => {
     return server.hover(documents.get(hover.textDocument.uri), hover.position)
