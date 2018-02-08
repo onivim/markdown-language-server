@@ -1,61 +1,82 @@
-import { createConnection, IConnection, TextDocuments, InitializeParams, InitializeResult, ServerCapabilities } from "vscode-languageserver"
+#!/usr/bin/env node
 
-import { TextDocument } from "vscode-languageserver-types"
+import { createConnection, TextDocuments, ServerCapabilities } from "vscode-languageserver"
 
-import * as types from "vscode-languageserver-types"
+import { TextDocument, Range } from "vscode-languageserver-types"
+import { MarkdownSettings, MarkdownServer } from "./service/MarkdownServer";
 
-let connection: IConnection = createConnection()
+const connection =
+  process.argv.length <= 2
+    ? createConnection(process.stdin, process.stdout) // no arg specified
+    : createConnection();
 
-console.log = connection.console.log.bind(connection.console)
-console.error = connection.console.error.bind(connection.console)
+//console.log = connection.console.log.bind(connection.console)
+//console.error = connection.console.error.bind(connection.console)
 
-let documents: TextDocuments = new TextDocuments()
+const documents = new TextDocuments()
+const server = new MarkdownServer({})
 
 documents.listen(connection)
 
-connection.onInitialize((params: InitializeParams): InitializeResult => {
-    let capabilities: ServerCapabilities = {
+connection.onInitialize(params => {
+    const capabilities: ServerCapabilities = {
         textDocumentSync: documents.syncKind,
         hoverProvider: true,
         definitionProvider: true,
+        documentFormattingProvider: true,
+        // documentRangeFormattingProvider: true TODO: Not Yet Usable see TODO in Markdown Document
     }
 
-    return {capabilities}
+    return { capabilities }
 })
 
-const documentContent: { [documentUri: string]: string } = {}
-
-const writeGood = require("write-good")
-
-interface IWriteGoodSuggestion {
-    reason: string
-    index: number // line
-    offset: number // character
-}
+const pendingValidationRequests: { [uri: string]: NodeJS.Timer } = {};
+const validationDelayMs = 200;
 
 documents.onDidChangeContent(change => {
-    const suggestions: IWriteGoodSuggestion[] = writeGood(change.document.getText())
-
-    const diagnostics = suggestions.map((suggestion:  IWriteGoodSuggestion) => {
-        const position = change.document.positionAt(suggestion.index)
-        const diagnostic: types.Diagnostic = {
-            message: suggestion.reason,
-            range: types.Range.create(position.line, position.character, position.line, position.character + suggestion.offset),
-        }
-
-        return diagnostic
-    })
-
-    connection.sendDiagnostics({ uri: change.document.uri, diagnostics })
+    triggerValidation(change.document)
 })
 
-connection.onHover(async (textDocumentPosition): Promise<types.Hover> => {
+documents.onDidClose(closed => {
+    server.closeDocument(closed.document)
+})
 
-    let document = documents.get(textDocumentPosition.textDocument.uri)
+function cleanPendingValidation(textDocument: TextDocument): void {
+    const request = pendingValidationRequests[textDocument.uri];
+    if (request) {
+        clearTimeout(request);
+        delete pendingValidationRequests[textDocument.uri];
+    }
+}
+  
+function triggerValidation(textDocument: TextDocument): void {
+    cleanPendingValidation(textDocument);
+    pendingValidationRequests[textDocument.uri] = setTimeout(() => {
+        delete pendingValidationRequests[textDocument.uri];
+        validateTextDocument(textDocument);
+    }, validationDelayMs);
+}
+  
+function validateTextDocument(textDocument: TextDocument): void {
+    server.validate(textDocument).then(diagnostics => {
+        connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+    })
+}
+  
+connection.onDocumentFormatting(formatting => {
+    return server.format(documents.get(formatting.textDocument.uri))
+})
 
-    // TODO:
-    // Image content
-    throw "No content"
+/*connection.onDocumentRangeFormatting(formatting => {
+    return server.format(documents.get(formatting.textDocument.uri), formatting.range)
+})*/
+
+connection.onHover(hover => {
+    return server.hover(documents.get(hover.textDocument.uri), hover.position)
+})
+
+connection.onShutdown(() => {
+    server.shutdown()
 })
 
 connection.listen()
